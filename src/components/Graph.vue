@@ -3,7 +3,7 @@
         <div class="flex justify-center items-center w-full">
             <div class="flex gap-5 px-4 py-2 border border-black rounded-md">
                 <span class="inline-block ps-[0.15rem]">
-                        Default
+                        BFS
                 </span>
                 <label class="relative inline-flex cursor-pointer items-center">
                     <input @change="toggleShowMode" id="switch" type="checkbox" class="peer sr-only"/>
@@ -12,298 +12,104 @@
                         class="peer h-6 w-11 rounded-full border bg-slate-200 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-green-300"></div>
                 </label>
                 <span class="inline-block ps-[0.15rem]">
-                        Changed
+                        DFS
                 </span>
             </div>
         </div>
-        <div v-show="showMode === 'default'">
+        <div v-show="showMode === 'bfs'">
             <div class="flex-col">
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">Directed</div>
+                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">bfs</div>
                 <div class="flex">
-                    <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-4 justify-center items-center">
                         <div id="directedMatrixTable" class="flex justify-center items-center">
                             <table class="table-fixed text-center">
                                 <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7"></td>
-                                    <td v-for="(row, i) in directedGraphMatrix" :key="i" class="w-7 h-7">{{
+                                    <td class="w-10 h-10"></td>
+                                    <td v-for="(row, i) in directedGraphMatrix" :key="i" class="w-10 h-10">{{
                                             i + 1
                                         }}
                                     </td>
                                 </tr>
                                 <tr v-for="(row, i) in directedGraphMatrix" :key="i"
                                     class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7">{{ i + 1 }}</td>
-                                    <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
+                                    <td class="w-10 h-10">{{ i + 1 }}</td>
+                                    <td v-for="(el, j) in row" :key="j" class="w-10 h-10 text-xs">
                                         {{ el }}
                                     </td>
                                 </tr>
                             </table>
                         </div>
-                        <div id="directedCharacteristics" class="">
-                            <table class="table-fixed text-center">
-                                <tr class="bg-red-200 border-b-4">
-                                    <td class="w-7 h-7 p-2">Вершини</td>
-                                    <td v-for="i in peaksNumber" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Степені</td>
-                                    <td v-for="i in directedPeaksPower" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Напівстепені виходу</td>
-                                    <td v-for="power in directedPeaksHalfPowerOut" :key="power" class="w-7 h-7 p-2">
-                                        {{ power }}
-                                    </td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Напівстепені заходу</td>
-                                    <td v-for="i in directedPeaksHalfPowerIn" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                            </table>
+                        <div class="flex rounded-md " role="group">
+                            <button :class="{'cursor-not-allowed opacity-50': this.BFSStep === 0}"
+                                    :disabled="this.BFSStep === 0" @click="BFSDoPreviousStep" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Previous Step
+                            </button>
+                            <button @click="BFSDoReset" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Reset
+                            </button>
+                            <button :class="{'cursor-not-allowed opacity-50': this.BFSStep === this.BFSSteps.length}"
+                                    :disabled="this.BFSStep === this.BFSSteps.length" @click="BFSDoNextStep"
+                                    type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Next Step
+                            </button>
                         </div>
-                        <div>
-                            <div class="flex gap-3">
-                                <div>Однорідність:</div>
-                                <div v-if="directedRegularPower" class="flex flex-row gap-3">
-                                    <div>+</div>
-                                    <div>Степінь: ({{ directedRegularPower }})</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div>Висячі вершини:</div>
-                                <div v-if="directedHangingPeaks.length" class="flex flex-row gap-3">
-                                    <div>{{ directedHangingPeaks }}</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div>Ізольовані вершини:</div>
-                                <div v-if="isolatedPeaks.length" class="flex flex-row gap-3">
-                                    <div>{{ isolatedPeaks }}</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
+                        <div class="whitespace-nowrap">
+                            BFS Steps: {{ this.BFSVector }}
                         </div>
                     </div>
-                    <div id="directedGraph" class="w-full h-full flex justify-center items-center"></div>
-                </div>
-            </div>
-            <div class="flex-col">
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">Undirected</div>
-                <div class="flex">
-                    <div class="flex flex-col gap-4">
-                        <div id="undirectedMatrixTable" class="flex justify-center items-center">
-                            <table class="table-fixed text-center">
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7"></td>
-                                    <td v-for="(row, i) in undirectedGraphMatrix" :key="i" class="w-7 h-7">{{
-                                            i + 1
-                                        }}
-                                    </td>
-                                </tr>
-                                <tr v-for="(row, i) in undirectedGraphMatrix" :key="i"
-                                    class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7">{{ i + 1 }}</td>
-                                    <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
-                                        {{ el }}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div id="undirectedCharacteristics" class="">
-                            <table class="table-fixed text-center">
-                                <tr class="bg-red-200 border-b-4">
-                                    <td class="w-7 h-7 p-2">Вершини</td>
-                                    <td v-for="i in peaksNumber" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Степені</td>
-                                    <td v-for="i in undirectedPeaksPower" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div>
-                            <div class="flex gap-3">
-                                <div>Однорідність:</div>
-                                <div v-if="undirectedRegularPower" class="flex flex-row gap-3">
-                                    <div>+</div>
-                                    <div>Степінь: ({{ undirectedRegularPower }})</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div>Висячі вершини:</div>
-                                <div v-if="undirectedHangingPeaks.length" class="flex flex-row gap-3">
-                                    <div>{{ undirectedHangingPeaks }}</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div>Ізольовані вершини:</div>
-                                <div v-if="isolatedPeaks.length" class="flex flex-row gap-3">
-                                    <div class="whitespace-nowrap">{{ isolatedPeaks }}</div>
-                                </div>
-                                <div v-else>-</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="undirectedGraph" class="w-full h-full flex justify-center items-center"></div>
+                    <div id="directedBFSGraph" class="w-full h-full flex justify-center items-center"></div>
                 </div>
             </div>
         </div>
-        <div v-show="showMode === 'changed'">
+        <div v-show="showMode === 'dfs'">
             <div class="flex-col">
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">Changed Directed
+                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">DFS
                 </div>
                 <div class="flex">
-                    <div class="flex flex-col gap-4">
-                        <div id="directedMatrixTableChanged" class="flex justify-center items-center">
+                    <div class="flex flex-col gap-4 justify-center items-center">
+                        <div id="directedMatrixTable" class="flex justify-center items-center">
                             <table class="table-fixed text-center">
                                 <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7"></td>
-                                    <td v-for="(row, i) in changedDirectedGraphMatrix" :key="i" class="w-7 h-7">{{
+                                    <td class="w-10 h-10"></td>
+                                    <td v-for="(row, i) in directedGraphMatrix" :key="i" class="w-10 h-10">{{
                                             i + 1
                                         }}
                                     </td>
                                 </tr>
-                                <tr v-for="(row, i) in changedDirectedGraphMatrix" :key="i"
+                                <tr v-for="(row, i) in directedGraphMatrix" :key="i"
                                     class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7">{{ i + 1 }}</td>
-                                    <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
+                                    <td class="w-10 h-10">{{ i + 1 }}</td>
+                                    <td v-for="(el, j) in row" :key="j" class="w-10 h-10 text-xs">
                                         {{ el }}
                                     </td>
                                 </tr>
                             </table>
                         </div>
-                        <div id="directedCharacteristicsChanged" class="flex justify-center items-center">
-                            <table class="table-fixed text-center">
-                                <tr class="bg-red-200 border-b-4">
-                                    <td class="w-7 h-7 p-2">Вершини</td>
-                                    <td v-for="i in peaksNumber" :key="i" class="w-7 h-7 p-2">{{ i }}</td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Напівстепені виходу</td>
-                                    <td v-for="power in changedDirectedPeaksHalfPowerOut" :key="power"
-                                        class="w-7 h-7 p-2">
-                                        {{ power }}
-                                    </td>
-                                </tr>
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-7 h-7 p-2">Напівстепені заходу</td>
-                                    <td v-for="i in changedDirectedPeaksHalfPowerIn" :key="i" class="w-7 h-7 p-2">
-                                        {{ i }}
-                                    </td>
-                                </tr>
-                            </table>
+                        <div class="flex rounded-md " role="group">
+                            <button :class="{'cursor-not-allowed opacity-50': this.DFSStep === 0}"
+                                    :disabled="this.DFSStep === 0" @click="DFSDoPreviousStep" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Previous Step
+                            </button>
+                            <button @click="DFSDoReset" type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Reset
+                            </button>
+                            <button :class="{'cursor-not-allowed opacity-50': this.DFSStep === this.DFSSteps.length}"
+                                    :disabled="this.DFSStep === this.DFSSteps.length" @click="DFSDoNextStep"
+                                    type="button"
+                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                                Next Step
+                            </button>
+                        </div>
+                        <div class="whitespace-nowrap">
+                            DFS Steps: {{ this.DFSVector }}
                         </div>
                     </div>
-                    <div id="changedDirectedGraph" class="w-full h-full flex justify-center items-center"></div>
-                </div>
-                <div class="flex flex-row gap-5">
-                    <div>
-                        <div>
-                            Матриця досяжності
-                        </div>
-                        <table class="table-fixed text-center">
-                            <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7"></td>
-                                <td v-for="(row, i) in changedDirectedReachabilityMatrix" :key="i" class="w-7 h-7">{{
-                                        i + 1
-                                    }}
-                                </td>
-                            </tr>
-                            <tr v-for="(row, i) in changedDirectedReachabilityMatrix" :key="i"
-                                class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7">{{ i + 1 }}</td>
-                                <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
-                                    {{ el }}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div>
-                        <div>
-                            Матриця cильної звʼязності
-                        </div>
-                        <table class="table-fixed text-center">
-                            <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7"></td>
-                                <td v-for="(row, i) in changedDirectedStrongConnectivityMatrix" :key="i"
-                                    class="w-7 h-7">{{
-                                        i + 1
-                                    }}
-                                </td>
-                            </tr>
-                            <tr v-for="(row, i) in changedDirectedStrongConnectivityMatrix" :key="i"
-                                class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7">{{ i + 1 }}</td>
-                                <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
-                                    {{ el }}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div>
-                        <div>
-                            Компоненти сильної звʼязності:
-                        </div>
-                        <div v-for="component in changedDirectedStrongComponents" :key="component">
-                            {{ component }}
-                        </div>
-                    </div>
-                    <div>
-                        <div>
-                            Матриця Конденсації:
-                        </div>
-                        <table class="table-fixed text-center">
-                            <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7"></td>
-                                <td v-for="(row, i) in changedDirectedCondensationMatrix" :key="i" class="w-7 h-7">{{
-                                        i + 1
-                                    }}
-                                </td>
-                            </tr>
-                            <tr v-for="(row, i) in changedDirectedCondensationMatrix" :key="i"
-                                class="odd:bg-white even:bg-gray-100 border-b-4">
-                                <td class="w-7 h-7">{{ i + 1 }}</td>
-                                <td v-for="(el, j) in row" :key="j" class="w-7 h-7 text-xs">
-                                    {{ el }}
-                                </td>
-                            </tr>
-                        </table>
-
-                    </div>
-                </div>
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase mt-5">Condensation
-                    Graph
-                </div>
-                <div class="flex justify-center items-center">
-                    <div id="changedDirectedCondensationGraph"
-                         class="w-1/2 h-1/2 flex justify-center items-center"></div>
-                </div>
-                <div class="">
-                    <div class="mb-4">
-                        <div>
-                            Шляхи довжиною 2
-                        </div>
-                        <div class="grid grid-rows-12 grid-flow-col gap-4 border border-black rounded-md p-3">
-
-                            <div class="whitespace-nowrap" v-for="path in changedDirectedPaths2" :key="path.join('-')">
-                                {{ path.join('-') }}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div>
-                            Шляхи довжиною 3
-                        </div>
-                        <div class="grid grid-rows-30 grid-flow-col gap-4 border border-black rounded-md p-3">
-                            <div class="whitespace-nowrap" v-for="path in changedDirectedPaths3" :key="path.join('-')">
-                                {{ path.join('-') }}
-                            </div>
-                        </div>
-                    </div>
+                    <div id="directedDFSGraph" class="w-full h-full flex justify-center items-center"></div>
                 </div>
             </div>
         </div>
@@ -337,39 +143,31 @@ export default {
             ptSize: null,
             arrowBranchLength: null,
             directedGraphMatrix: [],
-            undirectedGraphMatrix: [],
             peaksCoordinates: [],
-            directedPeaksHalfPowerOut: [],
-            directedPeaksHalfPowerIn: [],
-            directedPeaksPower: [],
-            undirectedPeaksPower: [],
-            directedRegularPower: null,
-            undirectedRegularPower: null,
-            directedHangingPeaks: [],
-            undirectedHangingPeaks: [],
-            isolatedPeaks: [],
-            showMode: 'default',
-            changedDirectedGraphMatrix: [],
-            changedDirectedPeaksHalfPowerOut: [],
-            changedDirectedPeaksHalfPowerIn: [],
-            changedDirectedPaths2: [],
-            changedDirectedPaths3: [],
-            changedDirectedReachabilityMatrix: [],
-            changedDirectedStrongConnectivityMatrix: [],
-            changedDirectedStrongComponents: [],
-            changedDirectedCondensationMatrix: [],
+            showMode: 'bfs',
+            BFSPaths: [],
+            BFSSteps: [],
+            BFSStep: 0,
+            BFSVector: [],
+            drawDirectedBFS: null,
+            DFSPaths: [],
+            DFSSteps: [],
+            DFSStep: 0,
+            DFSVector: [],
+            drawDirectedDFS: null,
+
         };
     },
     mounted() {
         this.calculate()
-        this.drawDirectedGraph()
-        this.drawUndirectedGraph()
-        this.drawChangedDirectedGraph()
-        this.drawChangedDirectedCondensationGraph()
+        this.drawDirectedBFSGraph()
+        this.drawDirectedDFSGraph()
+        this.setBFSPaths()
+        this.setDFSPaths()
     },
     methods: {
         setDirectedMatrix() {
-            const k = 1 - this.n3 * 0.01 - this.n4 * 0.01 - 0.3;
+            const k = 1 - this.n3 * 0.01 - this.n4 * 0.005 - 0.15;
             let seedrandom = require('seedrandom');
             let random = seedrandom(parseInt(`${this.n1}${this.n2}${this.n3}${this.n4}`));
 
@@ -439,21 +237,27 @@ export default {
 
         drawPeaks(peaksCoordinates, draw) {
             for (const peakCoordinates of peaksCoordinates) {
-                draw.circle(this.peakDiameter).center(peakCoordinates.cx, peakCoordinates.cy).fill('none').stroke({
-                    width: 1,
-                    color: '#000'
-                });
-                draw.text(peakCoordinates.title).amove(peakCoordinates.cx, peakCoordinates.cy + (this.fontSize * this.ptSize)).font({
-                    anchor: 'middle',
-                    size: this.fontSize
-                });
+                this.drawPeak(peakCoordinates, draw, '#000');
             }
         },
 
-        drawDirectedLine(start, end, drawDirected, isCurved = false) {
+        drawPeak(peakCoordinate, draw, color, width) {
+            draw.circle(this.peakDiameter).center(peakCoordinate.cx, peakCoordinate.cy).fill('none').stroke({
+                width: width,
+                color: color
+            });
+            draw.text(peakCoordinate.title).amove(peakCoordinate.cx, peakCoordinate.cy + (this.fontSize * this.ptSize)).font({
+                anchor: 'middle',
+                size: this.fontSize
+            });
+        },
+
+        drawDirectedLine(start, end, drawDirected, color, width, isCurved = false) {
             let peakOffsetStartX = 0, peakOffsetStartY = 0;
             let peakOffsetEndX = 0, peakOffsetEndY = 0;
             let isControlPointReversed = false;
+
+            let straightLine, arrowBranch1, arrowBranch2;
 
 
             const originalStart = start;
@@ -493,7 +297,7 @@ export default {
 
 
             // let color = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
-            let color = isCurved ? 'orange' : 'black'
+
 
             let controlPoint1;
             let correlation = this.arrowBranchLength / directedVectorLength;
@@ -504,13 +308,16 @@ export default {
                     y: isControlPointReversed ? endPoint.y : startPoint.y
                 };
 
-                drawDirected.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y).stroke({color: color, width: 1});
+                straightLine = drawDirected.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y).stroke({
+                    color: color,
+                    width: width
+                })
             } else {
                 correlation *= 2;
                 controlPoint1 = {x: (endPoint.x + startPoint.x) / 2 - 20, y: (endPoint.y + startPoint.y) / 2 - 20};
 
                 drawDirected.path(`M ${startPoint.x} ${startPoint.y} Q ${controlPoint1.x} ${controlPoint1.y}, ${endPoint.x} ${endPoint.y}`).fill('none').stroke({
-                    width: 1,
+                    width: width,
                     color: color
                 });
             }
@@ -519,28 +326,30 @@ export default {
                     x: (startPoint.x + correlation * controlPoint1.x) / (1 + correlation),
                     y: (startPoint.y + correlation * controlPoint1.y) / (1 + correlation)
                 };
-                drawDirected.line(startPoint.x, startPoint.y, arrowOffsetStart.x, arrowOffsetStart.y).stroke({
+                arrowBranch1 = drawDirected.line(startPoint.x, startPoint.y, arrowOffsetStart.x, arrowOffsetStart.y).stroke({
                     color: color,
-                    width: 1
+                    width: width,
                 }).rotate(20, startPoint.x, startPoint.y);
-                drawDirected.line(startPoint.x, startPoint.y, arrowOffsetStart.x, arrowOffsetStart.y).stroke({
+                arrowBranch2 = drawDirected.line(startPoint.x, startPoint.y, arrowOffsetStart.x, arrowOffsetStart.y).stroke({
                     color: color,
-                    width: 1
+                    width: width,
                 }).rotate(-20, startPoint.x, startPoint.y);
             } else {
                 const arrowOffsetEnd = {
                     x: (endPoint.x + correlation * controlPoint1.x) / (1 + correlation),
                     y: (endPoint.y + correlation * controlPoint1.y) / (1 + correlation)
                 };
-                drawDirected.line(endPoint.x, endPoint.y, arrowOffsetEnd.x, arrowOffsetEnd.y).stroke({
+                arrowBranch1 = drawDirected.line(endPoint.x, endPoint.y, arrowOffsetEnd.x, arrowOffsetEnd.y).stroke({
                     color: color,
-                    width: 1
+                    width: width,
                 }).rotate(20, endPoint.x, endPoint.y);
-                drawDirected.line(endPoint.x, endPoint.y, arrowOffsetEnd.x, arrowOffsetEnd.y).stroke({
+                arrowBranch2 = drawDirected.line(endPoint.x, endPoint.y, arrowOffsetEnd.x, arrowOffsetEnd.y).stroke({
                     color: color,
-                    width: 1
+                    width: width,
                 }).rotate(-20, endPoint.x, endPoint.y);
             }
+
+            return [straightLine, arrowBranch1, arrowBranch2]
         },
 
         drawCurveBezier(peakIndex, draw, isDirected = false) {
@@ -619,10 +428,10 @@ export default {
             drawUndirected.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y).stroke({color: '#000', width: 1});
         },
 
-        drawDirectedGraph() {
-            let drawDirected = SVG().addTo('#directedGraph').size(this.windowWidth, this.windowWidth);
+        drawDirectedBFSGraph() {
+            this.drawDirectedBFS = SVG().addTo('#directedBFSGraph').size(this.windowWidth, this.windowWidth);
 
-            this.drawPeaks(this.peaksCoordinates, drawDirected);
+            this.drawPeaks(this.peaksCoordinates, this.drawDirectedBFS);
 
             for (let i = 0; i < this.directedGraphMatrix.length; i++) {
                 for (let j = 0; j < this.directedGraphMatrix.length; j++) {
@@ -637,17 +446,276 @@ export default {
                         }
                         if (i !== j) {
                             if (this.directedGraphMatrix[i][j] === this.directedGraphMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, drawDirected, false);
-                                this.drawDirectedLine(end, start, drawDirected, true);
+                                this.drawDirectedLine(start, end, this.drawDirectedBFS, 'black', 1, false);
+                                this.drawDirectedLine(end, start, this.drawDirectedBFS, 'orange', 1, true);
                             } else if (this.directedGraphMatrix[i][j] !== this.directedGraphMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, drawDirected, false);
+                                this.drawDirectedLine(start, end, this.drawDirectedBFS, 'black', 1, false);
                             }
                         } else {
-                            this.drawCurveBezier(start, drawDirected, true);
+                            this.drawCurveBezier(start, this.drawDirectedBFS, true);
                         }
                     }
                 }
             }
+        },
+
+        drawDirectedDFSGraph() {
+            this.drawDirectedDFS = SVG().addTo('#directedDFSGraph').size(this.windowWidth, this.windowWidth);
+
+            this.drawPeaks(this.peaksCoordinates, this.drawDirectedDFS);
+
+            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
+                for (let j = 0; j < this.directedGraphMatrix.length; j++) {
+                    if (this.directedGraphMatrix[i][j] === 1) {
+                        const start = {
+                            cx: this.peaksCoordinates[i].cx,
+                            cy: this.peaksCoordinates[i].cy
+                        }
+                        const end = {
+                            cx: this.peaksCoordinates[j].cx,
+                            cy: this.peaksCoordinates[j].cy
+                        }
+                        if (i !== j) {
+                            if (this.directedGraphMatrix[i][j] === this.directedGraphMatrix[j][i] && i < j) {
+                                this.drawDirectedLine(start, end, this.drawDirectedDFS, 'black', 1, false);
+                                this.drawDirectedLine(end, start, this.drawDirectedDFS, 'orange', 1, true);
+                            } else if (this.directedGraphMatrix[i][j] !== this.directedGraphMatrix[j][i]) {
+                                this.drawDirectedLine(start, end, this.drawDirectedDFS, 'black', 1, false);
+                            }
+                        } else {
+                            this.drawCurveBezier(start, this.drawDirectedDFS, true);
+                        }
+                    }
+                }
+            }
+        },
+
+        bfs(start) {
+            const queue = [start];
+            this.visited[start] = true;
+
+
+            while (queue.length) {
+                const currentNode = queue.shift();
+                for (let i = 0; i < this.directedGraphMatrix[currentNode].length; i++) {
+                    if (this.directedGraphMatrix[currentNode][i] && !this.visited[i]) {
+                        queue.push(i);
+                        this.visited[i] = true;
+                        let peakStatuses = Array(this.peaksNumber).fill('new')
+                        for (let j = 0; j < this.peaksNumber; j++) {
+                            if (this.visited[j])
+                                peakStatuses[j] = 'visited';
+                        }
+                        peakStatuses[currentNode] = 'active';
+                        this.BFSSteps.push({step: [currentNode, i], peakStatuses: peakStatuses, drawElements: []});
+                    }
+                }
+            }
+            this.BFSSteps.push({step: [0, 0], peakStatuses: Array(this.peaksNumber).fill('visited'), drawElements: []});
+        },
+
+        setBFSPaths() {
+            this.visited = Array(this.directedGraphMatrix.length).fill(false);
+
+            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
+                if (!this.visited[i]) {
+                    this.bfs(i);
+                }
+            }
+
+            for (let i = 0; i < this.BFSSteps.length; i++) {
+                this.BFSVector.push(this.BFSSteps[i].step.map(el => el + 1))
+            }
+        },
+
+        BFSDoNextStep() {
+            for (let i = 0; i < this.peaksNumber; i++) {
+                let peakCoordinate = {
+                    cx: this.peaksCoordinates[i].cx,
+                    cy: this.peaksCoordinates[i].cy,
+                    title: this.peaksCoordinates[i].title
+                }
+
+                let color = 'red';
+                if (this.BFSSteps[this.BFSStep].peakStatuses[i] === 'visited') {
+                    color = 'green';
+                } else if (this.BFSSteps[this.BFSStep].peakStatuses[i] === 'active') {
+                    color = 'orange';
+                }
+
+                this.drawPeak(peakCoordinate, this.drawDirectedBFS, color, 3)
+
+
+            }
+
+            const start = {
+                cx: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[0]].cx,
+                cy: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[0]].cy
+            }
+            const end = {
+                cx: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[1]].cx,
+                cy: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[1]].cy
+            }
+
+            this.BFSSteps[this.BFSStep].drawElements = this.drawDirectedLine(start, end, this.drawDirectedBFS, 'red', 3, false);
+
+            if (this.BFSStep < this.BFSSteps.length) {
+                this.BFSStep++;
+            }
+        },
+
+        BFSDoPreviousStep() {
+
+            if (this.BFSStep === 1) {
+                this.BFSDoReset();
+                return 1;
+
+            } else if (this.BFSStep >= 0) {
+                this.BFSStep--;
+            }
+
+
+            for (const el of this.BFSSteps[this.BFSStep].drawElements) {
+                el.remove()
+            }
+
+            for (let i = 0; i < this.peaksNumber; i++) {
+                let peakCoordinate = {
+                    cx: this.peaksCoordinates[i].cx,
+                    cy: this.peaksCoordinates[i].cy,
+                    title: this.peaksCoordinates[i].title
+                }
+
+                let color = 'red';
+                if (this.BFSSteps[this.BFSStep - 1].peakStatuses[i] === 'visited') {
+                    color = 'green';
+                } else if (this.BFSSteps[this.BFSStep - 1].peakStatuses[i] === 'active') {
+                    color = 'orange';
+                }
+
+                this.drawPeak(peakCoordinate, this.drawDirectedBFS, color, 3)
+            }
+        },
+
+        BFSDoReset() {
+            this.drawDirectedBFS.remove()
+            this.drawDirectedBFSGraph()
+            this.BFSStep = 0;
+        },
+
+        dfs(start) {
+            const stack = [start];
+            this.visited[start] = true;
+
+            while (stack.length) {
+                let currentNode = stack.shift();
+                for (let i = 0; i < this.peaksNumber; i++) {
+                    if (this.directedGraphMatrix[currentNode][i] && !this.visited[i]) {
+                        stack.unshift(i);
+                        this.visited[i] = true;
+                        let peakStatuses = Array(this.peaksNumber).fill('new');
+                        for (let j = 0; j < this.peaksNumber; j++) {
+                            if (this.visited[j]) peakStatuses[j] = 'visited';
+                        }
+                        peakStatuses[currentNode] = 'active';
+
+                        this.DFSSteps.push({step: [currentNode, i], peakStatuses: peakStatuses, drawElements: []});
+
+                        this.dfs(i);
+                    }
+
+                }
+            }
+        },
+
+        setDFSPaths() {
+            this.visited = Array(this.directedGraphMatrix.length).fill(false);
+
+            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
+                if (!this.visited[i]) {
+                    this.dfs(i);
+                }
+            }
+            this.DFSSteps.push({step: [0, 0], peakStatuses: Array(this.peaksNumber).fill('visited'), drawElements: []});
+
+            for (let i = 0; i < this.DFSSteps.length; i++) {
+                this.DFSVector.push(this.DFSSteps[i].step.map(el => el + 1))
+            }
+        },
+
+        DFSDoNextStep() {
+            for (let i = 0; i < this.peaksNumber; i++) {
+                let peakCoordinate = {
+                    cx: this.peaksCoordinates[i].cx,
+                    cy: this.peaksCoordinates[i].cy,
+                    title: this.peaksCoordinates[i].title
+                }
+
+                let color = 'red';
+                if (this.DFSSteps[this.DFSStep].peakStatuses[i] === 'visited') {
+                    color = 'green';
+                } else if (this.DFSSteps[this.DFSStep].peakStatuses[i] === 'active') {
+                    color = 'orange';
+                }
+
+                this.drawPeak(peakCoordinate, this.drawDirectedDFS, color, 3)
+
+
+            }
+
+            const start = {
+                cx: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[0]].cx,
+                cy: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[0]].cy
+            }
+            const end = {
+                cx: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[1]].cx,
+                cy: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[1]].cy
+            }
+
+            this.DFSSteps[this.DFSStep].drawElements = this.drawDirectedLine(start, end, this.drawDirectedDFS, 'red', 3, false);
+
+            if (this.DFSStep < this.DFSSteps.length) {
+                this.DFSStep++;
+            }
+        },
+
+        DFSDoPreviousStep() {
+
+            if (this.DFSStep === 1) {
+                this.DFSDoReset();
+                return 1;
+
+            } else if (this.DFSStep >= 0) {
+                this.DFSStep--;
+            }
+
+
+            for (const el of this.DFSSteps[this.DFSStep].drawElements) {
+                el.remove()
+            }
+
+            for (let i = 0; i < this.peaksNumber; i++) {
+                let peakCoordinate = {
+                    cx: this.peaksCoordinates[i].cx,
+                    cy: this.peaksCoordinates[i].cy,
+                    title: this.peaksCoordinates[i].title
+                }
+
+                let color = 'red';
+                if (this.DFSSteps[this.DFSStep - 1].peakStatuses[i] === 'visited') {
+                    color = 'green';
+                } else if (this.DFSSteps[this.DFSStep - 1].peakStatuses[i] === 'active') {
+                    color = 'orange';
+                }
+
+                this.drawPeak(peakCoordinate, this.drawDirectedDFS, color, 3)
+            }
+        },
+
+        DFSDoReset() {
+            this.drawDirectedDFS.remove()
+            this.drawDirectedDFSGraph()
+            this.DFSStep = 0;
         },
 
         drawUndirectedGraph() {
@@ -694,10 +762,10 @@ export default {
                         }
                         if (i !== j) {
                             if (this.changedDirectedGraphMatrix[i][j] === this.changedDirectedGraphMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, drawChangedDirected, false);
-                                this.drawDirectedLine(end, start, drawChangedDirected, true);
+                                this.drawDirectedLine(start, end, drawChangedDirected, 'black', 1, false);
+                                this.drawDirectedLine(end, start, drawChangedDirected, 'orange', 1, true);
                             } else if (this.changedDirectedGraphMatrix[i][j] !== this.changedDirectedGraphMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, drawChangedDirected, false);
+                                this.drawDirectedLine(start, end, drawChangedDirected, 'black', 1, false);
                             }
                         } else {
                             this.drawCurveBezier(start, drawChangedDirected, true);
@@ -726,10 +794,10 @@ export default {
                         }
                         if (i !== j) {
                             if (this.changedDirectedCondensationMatrix[i][j] === this.changedDirectedCondensationMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, false);
-                                this.drawDirectedLine(end, start, drawChangedDirectedCondensation, true);
+                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, 'black', 1, false);
+                                this.drawDirectedLine(end, start, drawChangedDirectedCondensation, 'orange', 1, true);
                             } else if (this.changedDirectedCondensationMatrix[i][j] !== this.changedDirectedCondensationMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, false);
+                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, 'black', 1, false);
                             }
                         } else {
                             this.drawCurveBezier(start, drawChangedDirectedCondensation, true);
@@ -820,10 +888,10 @@ export default {
         },
 
         toggleShowMode() {
-            if (this.showMode === 'default') {
-                this.showMode = 'changed'
+            if (this.showMode === 'bfs') {
+                this.showMode = 'dfs'
             } else {
-                this.showMode = 'default'
+                this.showMode = 'bfs'
             }
         },
 
@@ -1040,26 +1108,7 @@ export default {
         calculate() {
             this.setConstData()
             this.setDirectedMatrix()
-            this.setUndirectedMatrix(this.directedGraphMatrix)
             this.peaksCoordinates = this.getPeaksCoordinates(this.peaksNumber)
-            this.directedPeaksHalfPowerOut = this.getPeaksHalfPowerOut(this.directedGraphMatrix)
-            this.directedPeaksHalfPowerIn = this.getPeaksHalfPowerIn(this.directedGraphMatrix)
-            this.setDirectedPeaksPower()
-            this.setUndirectedPeaksPower()
-            this.setDirectedRegularPower()
-            this.setUndirectedRegularPower()
-            this.setDirectedHangingPeaks()
-            this.setUndirectedHangingPeaks()
-            this.setIsolatedPeaks()
-            this.setChangedDirectedMatrix()
-            this.changedDirectedPeaksHalfPowerOut = this.getPeaksHalfPowerOut(this.changedDirectedGraphMatrix)
-            this.changedDirectedPeaksHalfPowerIn = this.getPeaksHalfPowerIn(this.changedDirectedGraphMatrix)
-            this.findPaths2(this.changedDirectedGraphMatrix)
-            this.findPaths3(this.changedDirectedGraphMatrix)
-            this.changedDirectedReachabilityMatrix = this.getReachabilityMatrix(this.changedDirectedGraphMatrix)
-            this.changedDirectedStrongConnectivityMatrix = this.getStrongConnectivityMatrix(this.changedDirectedReachabilityMatrix)
-            this.changedDirectedStrongComponents = this.getStrongComponents(this.changedDirectedStrongConnectivityMatrix)
-            this.changedDirectedCondensationMatrix = this.getCondensationMatrix(this.changedDirectedGraphMatrix, this.changedDirectedStrongComponents)
         }
     }
 }

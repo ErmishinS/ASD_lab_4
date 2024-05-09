@@ -1,36 +1,21 @@
 <template>
     <div class="p-5">
-        <div class="flex justify-center items-center w-full">
-            <div class="flex gap-5 px-4 py-2 border border-black rounded-md">
-                <span class="inline-block ps-[0.15rem]">
-                        BFS
-                </span>
-                <label class="relative inline-flex cursor-pointer items-center">
-                    <input @change="toggleShowMode" id="switch" type="checkbox" class="peer sr-only"/>
-                    <label for="switch" class="hidden"></label>
-                    <div
-                        class="peer h-6 w-11 rounded-full border bg-slate-200 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-green-300"></div>
-                </label>
-                <span class="inline-block ps-[0.15rem]">
-                        DFS
-                </span>
-            </div>
-        </div>
-        <div v-show="showMode === 'bfs'">
+        <div>
             <div class="flex-col">
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">bfs</div>
+                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">el prima algorithm
+                </div>
                 <div class="flex">
                     <div class="flex flex-col gap-4 justify-center items-center">
                         <div id="directedMatrixTable" class="flex justify-center items-center">
                             <table class="table-fixed text-center">
                                 <tr class="odd:bg-white even:bg-gray-100 border-b-4">
                                     <td class="w-10 h-10"></td>
-                                    <td v-for="(row, i) in directedGraphMatrix" :key="i" class="w-10 h-10">{{
+                                    <td v-for="(row, i) in wMatrix" :key="i" class="w-10 h-10">{{
                                             i + 1
                                         }}
                                     </td>
                                 </tr>
-                                <tr v-for="(row, i) in directedGraphMatrix" :key="i"
+                                <tr v-for="(row, i) in wMatrix" :key="i"
                                     class="odd:bg-white even:bg-gray-100 border-b-4">
                                     <td class="w-10 h-10">{{ i + 1 }}</td>
                                     <td v-for="(el, j) in row" :key="j" class="w-10 h-10 text-xs">
@@ -40,78 +25,29 @@
                             </table>
                         </div>
                         <div class="flex rounded-md " role="group">
-                            <button :class="{'cursor-not-allowed opacity-50': this.BFSStep === 0}"
-                                    :disabled="this.BFSStep === 0" @click="BFSDoPreviousStep" type="button"
+                            <button @click="primaDoReset" type="button"
                                     class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
-                                Previous Step
-                            </button>
-                            <button @click="BFSDoReset" type="button"
-                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
                                 Reset
                             </button>
-                            <button :class="{'cursor-not-allowed opacity-50': this.BFSStep === this.BFSSteps.length}"
-                                    :disabled="this.BFSStep === this.BFSSteps.length" @click="BFSDoNextStep"
+                            <button :class="{'cursor-not-allowed opacity-50': this.stepNumber === this.peaksNumber - 1}"
+                                    :disabled="this.stepNumber === this.peaksNumber"
+                                    @click="primaDoNextStep"
                                     type="button"
                                     class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
                                 Next Step
                             </button>
                         </div>
-                        <div class="whitespace-nowrap">
-                            BFS Steps: {{ this.BFSVector }}
-                        </div>
-                    </div>
-                    <div id="directedBFSGraph" class="w-full h-full flex justify-center items-center"></div>
-                </div>
-            </div>
-        </div>
-        <div v-show="showMode === 'dfs'">
-            <div class="flex-col">
-                <div class="w-full flex justify-center items-center text-2xl text-medium uppercase">DFS
-                </div>
-                <div class="flex">
-                    <div class="flex flex-col gap-4 justify-center items-center">
-                        <div id="directedMatrixTable" class="flex justify-center items-center">
-                            <table class="table-fixed text-center">
-                                <tr class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-10 h-10"></td>
-                                    <td v-for="(row, i) in directedGraphMatrix" :key="i" class="w-10 h-10">{{
-                                            i + 1
-                                        }}
-                                    </td>
-                                </tr>
-                                <tr v-for="(row, i) in directedGraphMatrix" :key="i"
-                                    class="odd:bg-white even:bg-gray-100 border-b-4">
-                                    <td class="w-10 h-10">{{ i + 1 }}</td>
-                                    <td v-for="(el, j) in row" :key="j" class="w-10 h-10 text-xs">
-                                        {{ el }}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="flex rounded-md " role="group">
-                            <button :class="{'cursor-not-allowed opacity-50': this.DFSStep === 0}"
-                                    :disabled="this.DFSStep === 0" @click="DFSDoPreviousStep" type="button"
-                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
-                                Previous Step
-                            </button>
-                            <button @click="DFSDoReset" type="button"
-                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
-                                Reset
-                            </button>
-                            <button :class="{'cursor-not-allowed opacity-50': this.DFSStep === this.DFSSteps.length}"
-                                    :disabled="this.DFSStep === this.DFSSteps.length" @click="DFSDoNextStep"
-                                    type="button"
-                                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
-                                Next Step
-                            </button>
+                        <div class="">
+                            Prima steps: {{ this.primaStepsToDisplay.slice(0, -1) }}
                         </div>
                         <div class="whitespace-nowrap">
-                            DFS Steps: {{ this.DFSVector }}
+                            Weight sum: {{ this.weightSum }}
                         </div>
                     </div>
-                    <div id="directedDFSGraph" class="w-full h-full flex justify-center items-center"></div>
+                    <div id="undirectedGraph" class="w-full h-full flex justify-center items-center"></div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -119,6 +55,76 @@
 
 <script>
 import {SVG} from '@svgdotjs/svg.js'
+
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+class LinkedList {
+    constructor() {
+        this.head = null;
+    }
+
+    add(data) {
+        const newNode = new Node(data);
+        if (!this.head) {
+            this.head = newNode;
+        } else {
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            current.next = newNode;
+        }
+    }
+
+    getData() {
+        const result = [];
+        let current = this.head;
+        while (current) {
+            result.push({
+                data: current.data,
+            });
+            current = current.next;
+        }
+        return result;
+    }
+
+    getLast() {
+        if (!this.head) {
+            return null;
+        }
+        let current = this.head;
+        while (current.next) {
+            current = current.next;
+        }
+        return current;
+    }
+
+    getStepsToDisplay() {
+        const steps = [];
+        let current = this.head;
+        while (current) {
+            steps.push([current.data.step[0] + 1, current.data.step[1] + 1, current.data.step[2]]);
+            current = current.next;
+        }
+        return steps;
+    }
+
+    getWeightSum() {
+        let sum = 0;
+        let current = this.head;
+        while (current) {
+            sum += current.data.step[2]
+            current = current.next;
+        }
+        return sum
+    }
+}
+
 
 export default {
     // eslint-disable-next-line vue/multi-word-component-names
@@ -143,6 +149,13 @@ export default {
             ptSize: null,
             arrowBranchLength: null,
             directedGraphMatrix: [],
+            undirectedGraphMatrix: [],
+            bMatrix: [],
+            cMatrix: [],
+            dMatrix: [],
+            hMatrix: [],
+            tMatrix: [],
+            wMatrix: [],
             peaksCoordinates: [],
             showMode: 'bfs',
             BFSPaths: [],
@@ -155,19 +168,24 @@ export default {
             DFSStep: 0,
             DFSVector: [],
             drawDirectedDFS: null,
+            primaSteps: null,
+            primaStep: null,
+            drawUndirected: null,
+            stepNumber: 0,
+            primaStepsToDisplay: [],
+            weightSum: null,
 
         };
     },
     mounted() {
         this.calculate()
-        this.drawDirectedBFSGraph()
-        this.drawDirectedDFSGraph()
-        this.setBFSPaths()
-        this.setDFSPaths()
+        this.drawUndirectedGraph()
+        this.prima()
+        this.setWeightSum()
     },
     methods: {
         setDirectedMatrix() {
-            const k = 1 - this.n3 * 0.01 - this.n4 * 0.005 - 0.15;
+            const k = 1 - this.n3 * 0.01 - this.n4 * 0.005 - 0.05;
             let seedrandom = require('seedrandom');
             let random = seedrandom(parseInt(`${this.n1}${this.n2}${this.n3}${this.n4}`));
 
@@ -193,22 +211,6 @@ export default {
                 }
             }
             this.undirectedGraphMatrix = undirectedMatrix;
-        },
-
-        setChangedDirectedMatrix() {
-            const k = 1 - this.n3 * 0.005 - this.n4 * 0.005 - 0.27;
-            let seedrandom = require('seedrandom');
-            let random = seedrandom(parseInt(`${this.n1}${this.n2}${this.n3}${this.n4}`));
-
-            const changedDirectedMatrix = [];
-            for (let i = 0; i < this.peaksNumber; i++) {
-                changedDirectedMatrix[i] = [];
-                for (let j = 0; j < this.peaksNumber; j++) {
-                    changedDirectedMatrix[i][j] = (random() * 2.0 * k) < 1 ? 0 : 1;
-                    // changedDirectedMatrix[i][j] = (Math.random() * 2.0 * k) < 1 ? 0 : 1;
-                }
-            }
-            this.changedDirectedGraphMatrix = changedDirectedMatrix;
         },
 
         getPeaksCoordinates(peaksNumber, isCondensation = false) {
@@ -428,657 +430,238 @@ export default {
             drawUndirected.line(startPoint.x, startPoint.y, endPoint.x, endPoint.y).stroke({color: '#000', width: 1});
         },
 
-        drawDirectedBFSGraph() {
-            this.drawDirectedBFS = SVG().addTo('#directedBFSGraph').size(this.windowWidth, this.windowWidth);
+        drawWeightText(start, end, weightText, drawUndirected, color, fontWeight) {
+            // const weight = this.wMatrix[start.peakNumber][end.peakNumber];
 
-            this.drawPeaks(this.peaksCoordinates, this.drawDirectedBFS);
+            drawUndirected.text(weightText).amove((start.cx + end.cx) / 2, (start.cy + end.cy) / 2 + ((this.fontSize / 1.5) * this.ptSize)).font({
+                anchor: 'end',
+                size: this.fontSize / 1.5,
+                weight: fontWeight
 
-            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
-                for (let j = 0; j < this.directedGraphMatrix.length; j++) {
-                    if (this.directedGraphMatrix[i][j] === 1) {
-                        const start = {
-                            cx: this.peaksCoordinates[i].cx,
-                            cy: this.peaksCoordinates[i].cy
-                        }
-                        const end = {
-                            cx: this.peaksCoordinates[j].cx,
-                            cy: this.peaksCoordinates[j].cy
-                        }
-                        if (i !== j) {
-                            if (this.directedGraphMatrix[i][j] === this.directedGraphMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, this.drawDirectedBFS, 'black', 1, false);
-                                this.drawDirectedLine(end, start, this.drawDirectedBFS, 'orange', 1, true);
-                            } else if (this.directedGraphMatrix[i][j] !== this.directedGraphMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, this.drawDirectedBFS, 'black', 1, false);
-                            }
-                        } else {
-                            this.drawCurveBezier(start, this.drawDirectedBFS, true);
-                        }
-                    }
-                }
-            }
-        },
+            }).stroke({
+                color: color
+            });
 
-        drawDirectedDFSGraph() {
-            this.drawDirectedDFS = SVG().addTo('#directedDFSGraph').size(this.windowWidth, this.windowWidth);
-
-            this.drawPeaks(this.peaksCoordinates, this.drawDirectedDFS);
-
-            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
-                for (let j = 0; j < this.directedGraphMatrix.length; j++) {
-                    if (this.directedGraphMatrix[i][j] === 1) {
-                        const start = {
-                            cx: this.peaksCoordinates[i].cx,
-                            cy: this.peaksCoordinates[i].cy
-                        }
-                        const end = {
-                            cx: this.peaksCoordinates[j].cx,
-                            cy: this.peaksCoordinates[j].cy
-                        }
-                        if (i !== j) {
-                            if (this.directedGraphMatrix[i][j] === this.directedGraphMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, this.drawDirectedDFS, 'black', 1, false);
-                                this.drawDirectedLine(end, start, this.drawDirectedDFS, 'orange', 1, true);
-                            } else if (this.directedGraphMatrix[i][j] !== this.directedGraphMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, this.drawDirectedDFS, 'black', 1, false);
-                            }
-                        } else {
-                            this.drawCurveBezier(start, this.drawDirectedDFS, true);
-                        }
-                    }
-                }
-            }
-        },
-
-        bfs(start) {
-            const queue = [start];
-            this.visited[start] = true;
-
-
-            while (queue.length) {
-                const currentNode = queue.shift();
-                for (let i = 0; i < this.directedGraphMatrix[currentNode].length; i++) {
-                    if (this.directedGraphMatrix[currentNode][i] && !this.visited[i]) {
-                        queue.push(i);
-                        this.visited[i] = true;
-                        let peakStatuses = Array(this.peaksNumber).fill('new')
-                        for (let j = 0; j < this.peaksNumber; j++) {
-                            if (this.visited[j])
-                                peakStatuses[j] = 'visited';
-                        }
-                        peakStatuses[currentNode] = 'active';
-                        this.BFSSteps.push({step: [currentNode, i], peakStatuses: peakStatuses, drawElements: []});
-                    }
-                }
-            }
-            this.BFSSteps.push({step: [0, 0], peakStatuses: Array(this.peaksNumber).fill('visited'), drawElements: []});
-        },
-
-        setBFSPaths() {
-            this.visited = Array(this.directedGraphMatrix.length).fill(false);
-
-            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
-                if (!this.visited[i]) {
-                    this.bfs(i);
-                }
-            }
-
-            for (let i = 0; i < this.BFSSteps.length; i++) {
-                this.BFSVector.push(this.BFSSteps[i].step.map(el => el + 1))
-            }
-        },
-
-        BFSDoNextStep() {
-            for (let i = 0; i < this.peaksNumber; i++) {
-                let peakCoordinate = {
-                    cx: this.peaksCoordinates[i].cx,
-                    cy: this.peaksCoordinates[i].cy,
-                    title: this.peaksCoordinates[i].title
-                }
-
-                let color = 'red';
-                if (this.BFSSteps[this.BFSStep].peakStatuses[i] === 'visited') {
-                    color = 'green';
-                } else if (this.BFSSteps[this.BFSStep].peakStatuses[i] === 'active') {
-                    color = 'orange';
-                }
-
-                this.drawPeak(peakCoordinate, this.drawDirectedBFS, color, 3)
-
-
-            }
-
-            const start = {
-                cx: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[0]].cx,
-                cy: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[0]].cy
-            }
-            const end = {
-                cx: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[1]].cx,
-                cy: this.peaksCoordinates[this.BFSSteps[this.BFSStep].step[1]].cy
-            }
-
-            this.BFSSteps[this.BFSStep].drawElements = this.drawDirectedLine(start, end, this.drawDirectedBFS, 'red', 3, false);
-
-            if (this.BFSStep < this.BFSSteps.length) {
-                this.BFSStep++;
-            }
-        },
-
-        BFSDoPreviousStep() {
-
-            if (this.BFSStep === 1) {
-                this.BFSDoReset();
-                return 1;
-
-            } else if (this.BFSStep >= 0) {
-                this.BFSStep--;
-            }
-
-
-            for (const el of this.BFSSteps[this.BFSStep].drawElements) {
-                el.remove()
-            }
-
-            for (let i = 0; i < this.peaksNumber; i++) {
-                let peakCoordinate = {
-                    cx: this.peaksCoordinates[i].cx,
-                    cy: this.peaksCoordinates[i].cy,
-                    title: this.peaksCoordinates[i].title
-                }
-
-                let color = 'red';
-                if (this.BFSSteps[this.BFSStep - 1].peakStatuses[i] === 'visited') {
-                    color = 'green';
-                } else if (this.BFSSteps[this.BFSStep - 1].peakStatuses[i] === 'active') {
-                    color = 'orange';
-                }
-
-                this.drawPeak(peakCoordinate, this.drawDirectedBFS, color, 3)
-            }
-        },
-
-        BFSDoReset() {
-            this.drawDirectedBFS.remove()
-            this.drawDirectedBFSGraph()
-            this.BFSStep = 0;
-        },
-
-        dfs(start) {
-            const stack = [start];
-            this.visited[start] = true;
-
-            while (stack.length) {
-                let currentNode = stack.shift();
-                for (let i = 0; i < this.peaksNumber; i++) {
-                    if (this.directedGraphMatrix[currentNode][i] && !this.visited[i]) {
-                        stack.unshift(i);
-                        this.visited[i] = true;
-                        let peakStatuses = Array(this.peaksNumber).fill('new');
-                        for (let j = 0; j < this.peaksNumber; j++) {
-                            if (this.visited[j]) peakStatuses[j] = 'visited';
-                        }
-                        peakStatuses[currentNode] = 'active';
-
-                        this.DFSSteps.push({step: [currentNode, i], peakStatuses: peakStatuses, drawElements: []});
-
-                        this.dfs(i);
-                    }
-
-                }
-            }
-        },
-
-        setDFSPaths() {
-            this.visited = Array(this.directedGraphMatrix.length).fill(false);
-
-            for (let i = 0; i < this.directedGraphMatrix.length; i++) {
-                if (!this.visited[i]) {
-                    this.dfs(i);
-                }
-            }
-            this.DFSSteps.push({step: [0, 0], peakStatuses: Array(this.peaksNumber).fill('visited'), drawElements: []});
-
-            for (let i = 0; i < this.DFSSteps.length; i++) {
-                this.DFSVector.push(this.DFSSteps[i].step.map(el => el + 1))
-            }
-        },
-
-        DFSDoNextStep() {
-            for (let i = 0; i < this.peaksNumber; i++) {
-                let peakCoordinate = {
-                    cx: this.peaksCoordinates[i].cx,
-                    cy: this.peaksCoordinates[i].cy,
-                    title: this.peaksCoordinates[i].title
-                }
-
-                let color = 'red';
-                if (this.DFSSteps[this.DFSStep].peakStatuses[i] === 'visited') {
-                    color = 'green';
-                } else if (this.DFSSteps[this.DFSStep].peakStatuses[i] === 'active') {
-                    color = 'orange';
-                }
-
-                this.drawPeak(peakCoordinate, this.drawDirectedDFS, color, 3)
-
-
-            }
-
-            const start = {
-                cx: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[0]].cx,
-                cy: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[0]].cy
-            }
-            const end = {
-                cx: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[1]].cx,
-                cy: this.peaksCoordinates[this.DFSSteps[this.DFSStep].step[1]].cy
-            }
-
-            this.DFSSteps[this.DFSStep].drawElements = this.drawDirectedLine(start, end, this.drawDirectedDFS, 'red', 3, false);
-
-            if (this.DFSStep < this.DFSSteps.length) {
-                this.DFSStep++;
-            }
-        },
-
-        DFSDoPreviousStep() {
-
-            if (this.DFSStep === 1) {
-                this.DFSDoReset();
-                return 1;
-
-            } else if (this.DFSStep >= 0) {
-                this.DFSStep--;
-            }
-
-
-            for (const el of this.DFSSteps[this.DFSStep].drawElements) {
-                el.remove()
-            }
-
-            for (let i = 0; i < this.peaksNumber; i++) {
-                let peakCoordinate = {
-                    cx: this.peaksCoordinates[i].cx,
-                    cy: this.peaksCoordinates[i].cy,
-                    title: this.peaksCoordinates[i].title
-                }
-
-                let color = 'red';
-                if (this.DFSSteps[this.DFSStep - 1].peakStatuses[i] === 'visited') {
-                    color = 'green';
-                } else if (this.DFSSteps[this.DFSStep - 1].peakStatuses[i] === 'active') {
-                    color = 'orange';
-                }
-
-                this.drawPeak(peakCoordinate, this.drawDirectedDFS, color, 3)
-            }
-        },
-
-        DFSDoReset() {
-            this.drawDirectedDFS.remove()
-            this.drawDirectedDFSGraph()
-            this.DFSStep = 0;
         },
 
         drawUndirectedGraph() {
-            let drawUndirected = SVG().addTo('#undirectedGraph').size(this.windowWidth, this.windowWidth);
+            this.drawUndirected = SVG().addTo('#undirectedGraph').size(this.windowWidth, this.windowWidth);
 
-            this.drawPeaks(this.peaksCoordinates, drawUndirected);
+            this.drawPeaks(this.peaksCoordinates, this.drawUndirected);
 
             for (let i = 0; i < this.undirectedGraphMatrix.length; i++) {
                 for (let j = 0; j < this.undirectedGraphMatrix.length; j++) {
                     const start = {
                         cx: this.peaksCoordinates[i].cx,
-                        cy: this.peaksCoordinates[i].cy
+                        cy: this.peaksCoordinates[i].cy,
+                        peakNumber: i,
                     }
+
                     const end = {
                         cx: this.peaksCoordinates[j].cx,
-                        cy: this.peaksCoordinates[j].cy
+                        cy: this.peaksCoordinates[j].cy,
+                        peakNumber: j,
                     }
                     if (this.undirectedGraphMatrix[i][j] === 1) {
                         if (i !== j) {
-                            this.drawUndirectedLine(start, end, drawUndirected);
+                            this.drawUndirectedLine(start, end, this.drawUndirected);
+                            const weightText = this.wMatrix[start.peakNumber][end.peakNumber]
+                            this.drawWeightText(start, end, weightText, this.drawUndirected, 'red', 1);
                         } else {
-                            this.drawCurveBezier(start, drawUndirected);
+                            this.drawCurveBezier(start, this.drawUndirected);
                         }
                     }
                 }
             }
         },
 
-        drawChangedDirectedGraph() {
-            let drawChangedDirected = SVG().addTo('#changedDirectedGraph').size(this.windowWidth, this.windowWidth);
+        setBMatrix() {
+            let seedrandom = require('seedrandom');
+            let random = seedrandom(parseInt(`${this.n1}${this.n2}${this.n3}${this.n4}`));
 
-            this.drawPeaks(this.peaksCoordinates, drawChangedDirected);
+            const bMatrix = [];
+            for (let i = 0; i < this.peaksNumber; i++) {
+                bMatrix[i] = [];
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    bMatrix[i][j] = (random() * 2.0);
+                }
+            }
+            this.bMatrix = bMatrix;
 
-            for (let i = 0; i < this.changedDirectedGraphMatrix.length; i++) {
-                for (let j = 0; j < this.changedDirectedGraphMatrix.length; j++) {
-                    if (this.changedDirectedGraphMatrix[i][j] === 1) {
-                        const start = {
-                            cx: this.peaksCoordinates[i].cx,
-                            cy: this.peaksCoordinates[i].cy
-                        }
-                        const end = {
-                            cx: this.peaksCoordinates[j].cx,
-                            cy: this.peaksCoordinates[j].cy
-                        }
-                        if (i !== j) {
-                            if (this.changedDirectedGraphMatrix[i][j] === this.changedDirectedGraphMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, drawChangedDirected, 'black', 1, false);
-                                this.drawDirectedLine(end, start, drawChangedDirected, 'orange', 1, true);
-                            } else if (this.changedDirectedGraphMatrix[i][j] !== this.changedDirectedGraphMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, drawChangedDirected, 'black', 1, false);
-                            }
-                        } else {
-                            this.drawCurveBezier(start, drawChangedDirected, true);
-                        }
+        },
+
+        setCMatrix() {
+            const cMatrix = [];
+            for (let i = 0; i < this.peaksNumber; i++) {
+                cMatrix[i] = [];
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    cMatrix[i][j] = Math.ceil(this.bMatrix[i][j] * 100 * this.undirectedGraphMatrix[i][j]);
+                }
+            }
+            this.cMatrix = cMatrix;
+        },
+
+        setDMatrix() {
+            const dMatrix = [];
+            for (let i = 0; i < this.peaksNumber; i++) {
+                dMatrix[i] = [];
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    dMatrix[i][j] = this.cMatrix[i][j] > 0 ? 1 : 0;
+                }
+            }
+            this.dMatrix = dMatrix;
+        },
+
+        setHMatrix() {
+            const hMatrix = [];
+            for (let i = 0; i < this.peaksNumber; i++) {
+                hMatrix[i] = [];
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    if (this.dMatrix[i][j] !== this.dMatrix[j][i]) {
+                        hMatrix[i][j] = 1
+                    } else {
+                        hMatrix[i][j] = 0
                     }
                 }
             }
+            this.hMatrix = hMatrix;
         },
 
-        drawChangedDirectedCondensationGraph() {
-            let drawChangedDirectedCondensation = SVG().addTo('#changedDirectedCondensationGraph').size(this.windowWidth, this.windowWidth);
-
-            const peaksCoordinates = this.getPeaksCoordinates(this.changedDirectedCondensationMatrix.length, true)
-            this.drawPeaks(peaksCoordinates, drawChangedDirectedCondensation);
-
-            for (let i = 0; i < this.changedDirectedCondensationMatrix.length; i++) {
-                for (let j = 0; j < this.changedDirectedCondensationMatrix.length; j++) {
-                    if (this.changedDirectedCondensationMatrix[i][j] === 1) {
-                        const start = {
-                            cx: peaksCoordinates[i].cx,
-                            cy: peaksCoordinates[i].cy
-                        }
-                        const end = {
-                            cx: peaksCoordinates[j].cx,
-                            cy: peaksCoordinates[j].cy
-                        }
-                        if (i !== j) {
-                            if (this.changedDirectedCondensationMatrix[i][j] === this.changedDirectedCondensationMatrix[j][i] && i < j) {
-                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, 'black', 1, false);
-                                this.drawDirectedLine(end, start, drawChangedDirectedCondensation, 'orange', 1, true);
-                            } else if (this.changedDirectedCondensationMatrix[i][j] !== this.changedDirectedCondensationMatrix[j][i]) {
-                                this.drawDirectedLine(start, end, drawChangedDirectedCondensation, 'black', 1, false);
-                            }
-                        } else {
-                            this.drawCurveBezier(start, drawChangedDirectedCondensation, true);
-                        }
+        setTMatrix() {
+            const tMatrix = [];
+            for (let i = 0; i < this.peaksNumber; i++) {
+                tMatrix[i] = [];
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    if (i < j) {
+                        tMatrix[i][j] = 1
+                    } else {
+                        tMatrix[i][j] = 0
                     }
                 }
             }
+            this.tMatrix = tMatrix;
         },
 
-        getPeaksHalfPowerOut(matrix) {
-            let i = 0;
-            const peaksHalfPowerOut = [];
-            for (const row of matrix) {
-                peaksHalfPowerOut[i] = row.reduce((a, b) => a + b, 0);
-                i++;
-            }
-            return peaksHalfPowerOut;
-        },
+        setWMatrix() {
+            const wMatrix = JSON.parse(JSON.stringify(this.undirectedGraphMatrix));
+            for (let i = 0; i < this.peaksNumber; i++) {
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    const el = (this.dMatrix[i][j] + this.hMatrix[i][j] * this.tMatrix[i][j]) * this.cMatrix[i][j]
+                    wMatrix[i][j] = el;
+                    wMatrix[j][i] = el;
 
-        getPeaksHalfPowerIn(matrix) {
-            const peaksHalfPowerIn = [];
-            for (let i = 0; i <= this.peaksNumber - 1; i++) {
-                peaksHalfPowerIn[i] = 0
-                for (let j = 0; j <= this.peaksNumber - 1; j++) {
-                    peaksHalfPowerIn[i] += matrix[j][i]
                 }
             }
-            return peaksHalfPowerIn;
+            this.wMatrix = wMatrix;
         },
 
-        setDirectedPeaksPower() {
-            for (let i = 0; i <= this.peaksNumber - 1; i++) {
-                this.directedPeaksPower[i] = this.directedPeaksHalfPowerOut[i] + this.directedPeaksHalfPowerIn[i]
-            }
+        setWeightSum() {
+            this.weightSum = this.primaSteps.getWeightSum()
         },
 
-        setUndirectedPeaksPower() {
-            let i = 0;
-            for (const row of this.undirectedGraphMatrix) {
-                this.undirectedPeaksPower[i] = row.reduce((a, b) => a + b, 0);
-                if (row[i] === 1) {
-                    this.undirectedPeaksPower[i] += 1
-                }
-                i++;
-            }
-        },
+        prima() {
+            const visited = new Array(this.peaksNumber).fill(false);
+            this.primaSteps = new LinkedList();
 
-        setDirectedRegularPower() {
-            const powerSet = new Set(this.directedPeaksPower)
 
-            if (powerSet.size === 1) {
-                this.directedRegularPower = powerSet.values().next().value
-            }
-        },
+            let start = 0;
+            visited[start] = true;
 
-        setUndirectedRegularPower() {
-            const powerSet = new Set(this.undirectedPeaksPower)
-            if (powerSet.size === 1) {
-                this.undirectedRegularPower = powerSet.values().next().value
-            }
-        },
+            while (this.primaSteps.getData().length < this.peaksNumber - 1) {
 
-        setDirectedHangingPeaks() {
-            this.directedHangingPeaks = []
-            for (let i = 0; i <= this.peaksNumber - 1; i++) {
-                if (this.directedPeaksPower[i] === 1) {
-                    this.directedHangingPeaks.push(i + 1)
-                }
-            }
-        },
+                let minWeight = Infinity;
+                let end = null;
 
-        setUndirectedHangingPeaks() {
-            this.undirectedHangingPeaks = []
-            for (let i = 0; i <= this.peaksNumber - 1; i++) {
-                if (this.undirectedPeaksPower[i] === 1) {
-                    this.undirectedHangingPeaks.push(i + 1)
-                }
-            }
-        },
-
-        setIsolatedPeaks() {
-            this.isolatedPeaks = []
-            for (let i = 0; i <= this.peaksNumber - 1; i++) {
-                if (this.directedPeaksPower[i] === 0) {
-                    this.isolatedPeaks.push(i + 1)
-                }
-            }
-        },
-
-        toggleShowMode() {
-            if (this.showMode === 'bfs') {
-                this.showMode = 'dfs'
-            } else {
-                this.showMode = 'bfs'
-            }
-        },
-
-        findPaths2(matrix) {
-            const n = matrix.length;
-            const A2 = this.multiplyMatrix(matrix, matrix);
-            const changedDirectedPaths2 = [];
-
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    if (A2[i][j]) {
-                        for (let k = 0; k < n; k++) {
-                            if (matrix[k][j] && matrix[i][k]) {
-                                changedDirectedPaths2.push([i + 1, k + 1, j + 1]);
-                            }
-                        }
-
+                for (let i = 0; i < this.peaksNumber; i++) {
+                    if (!visited[i] && this.wMatrix[start][i] && this.wMatrix[start][i] < minWeight) {
+                        minWeight = this.wMatrix[start][i];
+                        end = i;
                     }
                 }
-            }
 
-            this.changedDirectedPaths2 = changedDirectedPaths2;
+                let peakStatuses = Array(this.peaksNumber).fill('new')
+                for (let j = 0; j < this.peaksNumber; j++) {
+                    if (visited[j])
+                        peakStatuses[j] = 'visited';
+                }
+                peakStatuses[start] = 'active';
+
+                if (end === null) {
+                    start = this.primaSteps.getLast().data.step[0]
+                    continue;
+                }
+                const weight = this.wMatrix[start][end]
+                peakStatuses[end] = 'visited';
+                this.primaSteps.add({step: [start, end, weight], peakStatuses: peakStatuses, drawElements: []});
+
+                start = end;
+                visited[end] = true;
+
+
+            }
+            this.primaSteps.add({
+                step: [0, 0, 0],
+                peakStatuses: Array(this.peaksNumber).fill('visited'),
+                drawElements: []
+            });
+            this.primaStep = this.primaSteps.head;
+
+            this.primaStepsToDisplay = this.primaSteps.getStepsToDisplay()
         },
 
+        primaDoNextStep() {
+            const primaSteps = this.primaSteps.getData()
 
-        findPaths3(matrix) {
-            const n = matrix.length;
-            const A2 = this.multiplyMatrix(matrix, matrix);
-            const A3 = this.multiplyMatrix(matrix, A2);
-            const changedDirectedPaths3 = [];
 
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    if (A3[i][j]) {
-                        for (let k = 0; k < n; k++) {
-                            for (let x = 0; x < n; x++) {
-                                if (matrix[i][k] && matrix[k][x] && matrix[x][j]) {
-                                    changedDirectedPaths3.push([i + 1, k + 1, x + 1, j + 1]);
-                                }
-                            }
-                        }
-                    }
+            for (let i = 0; i < this.peaksNumber; i++) {
+                let peakCoordinate = {
+                    cx: this.peaksCoordinates[i].cx,
+                    cy: this.peaksCoordinates[i].cy,
+                    title: this.peaksCoordinates[i].title
                 }
+
+                let color = 'red';
+                if (primaSteps[this.stepNumber].data.peakStatuses[i] === 'visited') {
+                    color = 'green';
+                } else if (primaSteps[this.stepNumber].data.peakStatuses[i] === 'active') {
+                    color = 'orange';
+                }
+
+                this.drawPeak(peakCoordinate, this.drawUndirected, color, 3)
+
             }
 
-            this.changedDirectedPaths3 = changedDirectedPaths3;
+            const start = {
+                cx: this.peaksCoordinates[primaSteps[this.stepNumber].data.step[0]].cx,
+                cy: this.peaksCoordinates[primaSteps[this.stepNumber].data.step[0]].cy,
+                peakNumber: primaSteps[this.stepNumber].data.step[0]
+
+            }
+            const end = {
+                cx: this.peaksCoordinates[primaSteps[this.stepNumber].data.step[1]].cx,
+                cy: this.peaksCoordinates[primaSteps[this.stepNumber].data.step[1]].cy,
+                peakNumber: primaSteps[this.stepNumber].data.step[1]
+            }
+
+            if (primaSteps[this.stepNumber].data.step[0] !== primaSteps[this.stepNumber].data.step[1]) {
+                primaSteps[this.stepNumber].data.drawElements = this.drawDirectedLine(start, end, this.drawUndirected, 'red', 3, false);
+                const weightText = primaSteps[this.stepNumber].data.step[2]
+                this.drawWeightText(start, end, weightText, this.drawUndirected, 'green', 500);
+            }
+
+            if (this.primaStep.next !== null) {
+                this.primaStep = this.primaStep.next;
+                this.stepNumber++;
+            }
+
+
         },
 
-        multiplyMatrix(matrix1, matrix2) {
-            const result = [];
-            const n = matrix1.length;
-
-            for (let i = 0; i < n; i++) {
-                result[i] = [];
-                for (let j = 0; j < n; j++) {
-                    let sum = 0;
-                    for (let k = 0; k < n; k++) {
-                        sum += matrix1[i][k] * matrix2[k][j];
-                    }
-                    result[i][j] = sum;
-                }
-            }
-
-            return result;
-        },
-
-        sumMatrix(matrix1, matrix2) {
-            const resultMatrix = [];
-
-            for (let i = 0; i < matrix1.length; i++) {
-                resultMatrix[i] = [];
-                for (let j = 0; j < matrix1[0].length; j++) {
-                    resultMatrix[i][j] = matrix1[i][j] + matrix2[i][j];
-                }
-            }
-
-            return resultMatrix
-        },
-
-        transposeMatrix(matrix) {
-            const transposedMatrix = [];
-
-            for (let i = 0; i < matrix[0].length; i++) {
-                transposedMatrix[i] = []
-                for (let j = 0; j < matrix.length; j++) {
-                    transposedMatrix[i][j] = matrix[j][i];
-                }
-            }
-
-            return transposedMatrix;
-        },
-
-        multiplyMatrixByElement(matrix1, matrix2) {
-            const multipliedMatrixByElement = []
-
-            for (let i = 0; i < matrix1.length; i++) {
-                multipliedMatrixByElement[i] = []
-                for (let j = 0; j < matrix2[0].length; j++) {
-                    multipliedMatrixByElement[i][j] = matrix1[i][j] * matrix2[i][j];
-                }
-            }
-
-            return multipliedMatrixByElement;
-        },
-
-        getReachabilityMatrix(matrix) {
-            const n = matrix.length;
-            const identityMatrix = Array.from({length: n}, (_, i) => Array.from({length: n}, (_, j) => i === j ? 1 : 0));
-            let matrixPowers = matrix
-            let reachabilityMatrix = this.sumMatrix(identityMatrix, matrixPowers);
-
-            for (let i = 0; i < n - 2; i++) {
-                matrixPowers = this.multiplyMatrix(matrixPowers, matrix);
-                reachabilityMatrix = this.sumMatrix(reachabilityMatrix, matrixPowers);
-            }
-
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    reachabilityMatrix[i][j] = reachabilityMatrix[i][j] > 0 ? 1 : 0;
-                }
-            }
-
-            return reachabilityMatrix;
-        },
-
-        getStrongConnectivityMatrix(reachabilityMatrix) {
-            const transposedReachabilityMatrix = this.transposeMatrix(reachabilityMatrix);
-
-            return this.multiplyMatrixByElement(reachabilityMatrix, transposedReachabilityMatrix)
-        },
-
-        getStrongComponents(strongConnectivityMatrix) {
-            const n = strongConnectivityMatrix.length;
-            const visited = new Array(n).fill(false);
-            const strongComponents = []
-
-
-            const depthFirstSearch = (peak, component) => {
-                visited[peak] = true;
-                component.push(peak + 1);
-
-                for (let i = 0; i < n; i++) {
-                    if (strongConnectivityMatrix[peak][i] && !visited[i]) {
-                        depthFirstSearch(i, component);
-                    }
-                }
-            };
-
-            for (let i = 0; i < n; i++) {
-                if (!visited[i]) {
-                    const component = [];
-                    depthFirstSearch(i, component);
-                    strongComponents.push(component);
-                }
-            }
-
-            return strongComponents;
-        },
-
-        getCondensationMatrix(graphMatrix, components) {
-            const condensationMatrixLength = components.length
-            const condensationMatrix = []
-
-            for (let i = 0; i < condensationMatrixLength; i++) {
-                condensationMatrix.push(new Array(condensationMatrixLength).fill(0))
-            }
-
-            for (let i = 0; i < condensationMatrixLength; i++) {
-                for (let j = 0; j < condensationMatrixLength; j++) {
-                    if (i === j) continue;
-                    let isConnected = false;
-                    for (let x = 0; x < components[i].length; x++) {
-                        for (let k = 0; k < components[j].length; k++) {
-                            if (graphMatrix[components[i][x] - 1][components[j][k] - 1]) {
-                                condensationMatrix[i][j] = 1;
-                                isConnected = true;
-                                break;
-                            }
-                        }
-                        if (isConnected) {
-                            break
-                        }
-                    }
-                }
-            }
-
-            return condensationMatrix;
+        primaDoReset() {
+            this.drawUndirected.remove()
+            this.drawUndirectedGraph()
+            this.stepNumber = 0;
+            this.primaStep = this.primaSteps.head
         },
 
         setConstData() {
@@ -1108,7 +691,14 @@ export default {
         calculate() {
             this.setConstData()
             this.setDirectedMatrix()
+            this.setUndirectedMatrix(this.directedGraphMatrix)
             this.peaksCoordinates = this.getPeaksCoordinates(this.peaksNumber)
+            this.setBMatrix()
+            this.setCMatrix()
+            this.setDMatrix()
+            this.setHMatrix()
+            this.setTMatrix()
+            this.setWMatrix()
         }
     }
 }

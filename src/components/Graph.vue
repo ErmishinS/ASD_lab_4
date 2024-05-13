@@ -563,42 +563,46 @@ export default {
             const visited = new Array(this.peaksNumber).fill(false);
             this.primaSteps = new LinkedList();
 
-
             let start = 0;
             visited[start] = true;
 
             while (this.primaSteps.getData().length < this.peaksNumber - 1) {
-
                 let minWeight = Infinity;
-                let end = null;
+                let minStart = null;
+                let minEnd = null;
 
                 for (let i = 0; i < this.peaksNumber; i++) {
-                    if (!visited[i] && this.wMatrix[start][i] && this.wMatrix[start][i] < minWeight) {
-                        minWeight = this.wMatrix[start][i];
-                        end = i;
+                    if (visited[i]) {
+                        for (let j = 0; j < this.peaksNumber; j++) {
+                            if (!visited[j] && this.wMatrix[i][j] && this.wMatrix[i][j] < minWeight) {
+                                minWeight = this.wMatrix[i][j];
+                                minStart = i;
+                                minEnd = j;
+                            }
+                        }
                     }
                 }
 
-                let peakStatuses = Array(this.peaksNumber).fill('new')
+                if (minStart === null || minEnd === null) {
+                    break;
+                }
+
+                let peakStatuses = Array(this.peaksNumber).fill('new');
                 for (let j = 0; j < this.peaksNumber; j++) {
-                    if (visited[j])
+                    if (visited[j]) {
                         peakStatuses[j] = 'visited';
+                    }
                 }
-                peakStatuses[start] = 'active';
+                peakStatuses[minStart] = 'active';
 
-                if (end === null) {
-                    start = this.primaSteps.getLast().data.step[0]
-                    continue;
-                }
-                const weight = this.wMatrix[start][end]
-                peakStatuses[end] = 'visited';
-                this.primaSteps.add({step: [start, end, weight], peakStatuses: peakStatuses, drawElements: []});
+                const weight = this.wMatrix[minStart][minEnd];
+                peakStatuses[minEnd] = 'visited';
+                this.primaSteps.add({step: [minStart, minEnd, weight], peakStatuses: peakStatuses, drawElements: []});
 
-                start = end;
-                visited[end] = true;
-
-
+                start = minEnd;
+                visited[minEnd] = true;
             }
+
             this.primaSteps.add({
                 step: [0, 0, 0],
                 peakStatuses: Array(this.peaksNumber).fill('visited'),
@@ -606,7 +610,7 @@ export default {
             });
             this.primaStep = this.primaSteps.head;
 
-            this.primaStepsToDisplay = this.primaSteps.getStepsToDisplay()
+            this.primaStepsToDisplay = this.primaSteps.getStepsToDisplay();
         },
 
         primaDoNextStep() {
